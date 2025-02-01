@@ -1,0 +1,30 @@
+name: Wpm
+
+on:
+  push:
+     branches:
+       - 03_05e
+
+jobs:
+   build:
+     runs-on: ubuntu-latest
+
+     steps:
+       - uses: actions/checkout@v3
+
+       - name: Log in
+         uses: azure/login@v1
+         with:
+           creds: ${{ secrets.AZURE }}
+
+       - name: 'Log in to ACR'
+         uses: azure/docker-login@v1
+         with:
+            login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+            username: ${{ secrets.ACR_USERNAME }}
+            password: ${{ secrets.ACR_PASSWORD }}
+
+       - name: 'Build and push container image'
+         run: |
+            docker build src -f src/Wpm.Management.Api/Dockerfile -t ${{ secrets.ACR_LOGIN_SERVER }}/wpm-management-api:${{ github.sha }}
+            docker push ${{ secrets.ACR_LOGIN_SERVER }}/wpm-management-api:${{ github.sha }}
